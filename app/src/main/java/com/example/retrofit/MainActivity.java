@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     ApiInterface apiInterface;
     RecyclerView recyclerView;
+    Adapter adapter;
 
 
 
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response.body().size()>0){
                     List<PostPojo> postList = response.body();
 
-                    Adapter adapter = new Adapter(postList,MainActivity.this);
+                    adapter = new Adapter(postList,MainActivity.this);
                     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this);
                     recyclerView.setLayoutManager(linearLayoutManager);
                     recyclerView.setAdapter(adapter);
@@ -66,8 +67,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu,menu);
+
         MenuItem item = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) item.getActionView();
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        searchView.setQueryHint("Search Here");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -76,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+
                 return false;
             }
         });

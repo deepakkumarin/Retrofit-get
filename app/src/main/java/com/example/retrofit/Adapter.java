@@ -19,12 +19,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.CustomViewHolder> impl
     private List<PostPojo> dataList;
     private Context context;
 
-    List<PostPojo> postList;
+    List<PostPojo> postListAll;
 
     public Adapter(List<PostPojo> dataList, Context context) {
         this.dataList = dataList;
         this.context = context;
-        this.postList = new ArrayList<>(postList);
+        this.postListAll = new ArrayList<>(dataList);
     }
 
 
@@ -50,17 +50,41 @@ public class Adapter extends RecyclerView.Adapter<Adapter.CustomViewHolder> impl
     public Filter getFilter() {
         return filter;
     }
-    Filter filter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            return null;
-        }
+   private final Filter filter = new Filter() {
+       @Override
+       protected FilterResults performFiltering(CharSequence constraint) {
+           List<PostPojo> postList = new ArrayList<>();
 
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
+           if (constraint==null || constraint.length()==0)
+           {
+               postList.addAll(postListAll);
+           }
+           else
+           {
+               String filterPattern = constraint.toString().toLowerCase().trim();
 
-        }
-    };
+               for (PostPojo post:postListAll)
+               {
+                   if (post.getTitle().toLowerCase().contains(filterPattern))
+                   {
+                       postList.add(post);
+                   }
+               }
+           }
+           FilterResults results =  new FilterResults();
+           results.values = postList;
+           results.count = postList.size();
+           return results;
+       }
+
+       @Override
+       protected void publishResults(CharSequence constraint, FilterResults results) {
+           dataList.clear();
+           dataList.addAll((ArrayList) results.values);
+           notifyDataSetChanged();
+
+       }
+   };
 
     class CustomViewHolder extends RecyclerView.ViewHolder {
         TextView title, posts;
@@ -69,6 +93,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.CustomViewHolder> impl
             super(itemView);
             title = itemView.findViewById(R.id.title);
             posts = itemView.findViewById(R.id.body);
+
 
         }
     }
